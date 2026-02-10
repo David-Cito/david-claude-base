@@ -1,6 +1,6 @@
 # MCP Servers Included
 
-This plugin includes 3 pre-configured MCP servers that enhance Claude Code's capabilities.
+This plugin includes 4 pre-configured MCP servers that enhance Claude Code's capabilities.
 
 ## Included Servers
 
@@ -31,7 +31,7 @@ This plugin includes 3 pre-configured MCP servers that enhance Claude Code's cap
 - Browser automation
 - Visual testing
 
-### 3. **Git** (`@anthropic/mcp-git`)
+### 3. **Git** (`@cyanheads/git-mcp-server`)
 **Purpose**: Git operations and repository management
 
 **Capabilities**:
@@ -47,6 +47,24 @@ This plugin includes 3 pre-configured MCP servers that enhance Claude Code's cap
 - Branch management
 - Commit workflows
 
+### 4. **Supabase** (`@supabase/mcp-server-supabase`)
+**Purpose**: Supabase database operations
+
+**Capabilities**:
+- Query databases
+- Manage tables
+- Execute SQL
+- Handle authentication
+- Work with storage
+
+**Use Cases**:
+- Database management
+- Schema exploration
+- Data queries
+- Admin operations
+
+**Note**: Requires `SUPABASE_ACCESS_TOKEN` environment variable to be set.
+
 ## Using MCP Servers
 
 After installing this plugin:
@@ -55,33 +73,31 @@ After installing this plugin:
 2. **Restart Required**: Restart Claude Code after plugin installation
 3. **Tool Access**: MCP tools appear in Claude's available tools list
 
-## Adding More MCP Servers
+## Environment Variables
 
-You can add custom MCP servers to your local `.claude/.mcp.json`:
+Some servers require environment variables:
 
-```json
-{
-  "server-name": {
-    "command": "npx",
-    "args": ["-y", "package-name"],
-    "env": {
-      "API_KEY": "your-key"
-    }
-  }
-}
+```bash
+# For Git server (optional - sets base directory for repos)
+GIT_BASE_DIR=/path/to/your/repos
+
+# For Supabase server (required)
+SUPABASE_ACCESS_TOKEN=your-token
 ```
 
-### Optional: Add Supabase Server
+## Adding More MCP Servers
 
-If you're using Supabase, add this server:
+You can add custom MCP servers to your local `.mcp.json`:
 
 ```json
 {
-  "supabase": {
-    "command": "npx",
-    "args": ["-y", "@supabase/mcp-server-supabase"],
-    "env": {
-      "SUPABASE_ACCESS_TOKEN": "your-token"
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "package-name"],
+      "env": {
+        "API_KEY": "your-key"
+      }
     }
   }
 }

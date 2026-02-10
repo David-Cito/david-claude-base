@@ -141,8 +141,13 @@
     },
     "git": {
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-git"],
+      "args": ["@cyanheads/git-mcp-server@latest"],
       "description": "Git operations and repository management"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase"],
+      "description": "Supabase database operations and management"
     }
   },
   "tags": [

@@ -1,14 +1,34 @@
 {
   "name": "david-claude-base",
   "version": "1.0.0",
-  "description": "David's personal Claude Code setup with 14 productivity commands and 12 specialized AI agents for modern web development",
+  "description": "David's Pipeline - personal Claude Code setup with 16 productivity commands and 8 specialized AI agents for modern web development",
   "author": "David",
   "license": "MIT",
   "commands": [
     {
-      "name": "new-task",
-      "path": ".claude/commands/new-task.md",
-      "description": "Analyze code for performance issues and suggest optimizations"
+      "name": "spec-analyze",
+      "path": ".claude/commands/spec-analyze.md",
+      "description": "Gap analysis on spec to find missing requirements"
+    },
+    {
+      "name": "spec-expand",
+      "path": ".claude/commands/spec-expand.md",
+      "description": "Expand analyzed spec into docs/specs, docs/tasks, PROGRESS.md"
+    },
+    {
+      "name": "auto-build",
+      "path": ".claude/commands/auto-build.md",
+      "description": "Automated sequential build with phase gates"
+    },
+    {
+      "name": "phase-gate",
+      "path": ".claude/commands/phase-gate.md",
+      "description": "Quality checkpoint between phases"
+    },
+    {
+      "name": "davids-pipeline",
+      "path": ".claude/commands/davids-pipeline.md",
+      "description": "Quick reference for David's Pipeline workflow"
     },
     {
       "name": "code-explain",
@@ -24,11 +44,6 @@
       "name": "code-cleanup",
       "path": ".claude/commands/misc/code-cleanup.md",
       "description": "Clean up and refactor code"
-    },
-    {
-      "name": "feature-plan",
-      "path": ".claude/commands/misc/feature-plan.md",
-      "description": "Plan new feature implementation"
     },
     {
       "name": "lint",
@@ -64,6 +79,16 @@
       "name": "page-new",
       "path": ".claude/commands/ui/page-new.md",
       "description": "Create new Next.js page"
+    },
+    {
+      "name": "deploy",
+      "path": ".claude/commands/deploy.md",
+      "description": "Deploy to staging or production with verification"
+    },
+    {
+      "name": "rollback",
+      "path": ".claude/commands/rollback.md",
+      "description": "Emergency rollback with health checks"
     }
   ],
   "agents": [
@@ -78,39 +103,9 @@
       "description": "Design reliable backend systems with focus on data integrity, security, and fault tolerance"
     },
     {
-      "name": "deep-research-agent",
-      "path": ".claude/agents/deep-research-agent.md",
-      "description": "Specialist for comprehensive research with adaptive strategies and intelligent exploration"
-    },
-    {
       "name": "frontend-architect",
       "path": ".claude/agents/frontend-architect.md",
       "description": "Create accessible, performant user interfaces with focus on user experience and modern frameworks"
-    },
-    {
-      "name": "learning-guide",
-      "path": ".claude/agents/learning-guide.md",
-      "description": "Teach programming concepts and explain code with focus on understanding through progressive learning"
-    },
-    {
-      "name": "performance-engineer",
-      "path": ".claude/agents/performance-engineer.md",
-      "description": "Optimize system performance through measurement-driven analysis and bottleneck elimination"
-    },
-    {
-      "name": "refactoring-expert",
-      "path": ".claude/agents/refactoring-expert.md",
-      "description": "Improve code quality and reduce technical debt through systematic refactoring and clean code principles"
-    },
-    {
-      "name": "requirements-analyst",
-      "path": ".claude/agents/requirements-analyst.md",
-      "description": "Transform ambiguous project ideas into concrete specifications through systematic requirements discovery"
-    },
-    {
-      "name": "security-engineer",
-      "path": ".claude/agents/security-engineer.md",
-      "description": "Identify security vulnerabilities and ensure compliance with security standards and best practices"
     },
     {
       "name": "system-architect",
@@ -126,6 +121,16 @@
       "name": "code-reviewer",
       "path": ".claude/agents/code-reviewer.md",
       "description": "Comprehensive 6-point code review covering spec compliance, quality, maintainability, testing, risks, and recommendations"
+    },
+    {
+      "name": "security-auditor",
+      "path": ".claude/agents/security-auditor.md",
+      "description": "Security vulnerability scanning and compliance checks at phase gates and final audits"
+    },
+    {
+      "name": "test-engineer",
+      "path": ".claude/agents/test-engineer.md",
+      "description": "Write and run comprehensive tests across unit, integration, E2E, and visual testing layers"
     }
   ],
   "mcpServers": {

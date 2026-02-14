@@ -4,12 +4,12 @@
     "name": "David",
     "contact": "github.com/davidsalter1"
   },
-  "description": "David's curated Claude Code setup for productive development",
+  "description": "David's Pipeline - curated Claude Code setup for productive development",
   "plugins": [
     {
       "name": "david-claude-base",
       "source": "./",
-      "description": "Personal Claude Code configuration with 14 productivity commands and 12 specialized AI agents for modern web development",
+      "description": "David's Pipeline - personal Claude Code configuration with 14 productivity commands and 12 specialized AI agents for modern web development",
       "version": "1.0.0",
       "author": {
         "name": "David",

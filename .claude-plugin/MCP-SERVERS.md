@@ -47,15 +47,16 @@ This plugin includes 4 pre-configured MCP servers that enhance Claude Code's cap
 - Branch management
 - Commit workflows
 
-### 4. **Supabase** (`@supabase/mcp-server-supabase`)
+### 4. **Supabase** (HTTP-based)
 **Purpose**: Supabase database operations
 
 **Capabilities**:
 - Query databases
-- Manage tables
+- Manage tables and migrations
 - Execute SQL
-- Handle authentication
-- Work with storage
+- Deploy Edge Functions
+- Manage branches
+- View logs and advisors
 
 **Use Cases**:
 - Database management
@@ -63,7 +64,7 @@ This plugin includes 4 pre-configured MCP servers that enhance Claude Code's cap
 - Data queries
 - Admin operations
 
-**Note**: Requires `SUPABASE_ACCESS_TOKEN` environment variable to be set.
+**Setup**: Uses Supabase's hosted MCP endpoint (`https://mcp.supabase.com/mcp`) with Bearer token authentication. Get your access token from [Supabase Dashboard](https://supabase.com/dashboard/account/tokens).
 
 ## Using MCP Servers
 
@@ -75,20 +76,21 @@ After installing this plugin:
 
 ## Environment Variables
 
-Some servers require environment variables:
+Some servers use environment variables:
 
 ```bash
-# For Git server (optional - sets base directory for repos)
+# For Git server (optional - restricts operations to this directory)
 GIT_BASE_DIR=/path/to/your/repos
 
-# For Supabase server (required)
-SUPABASE_ACCESS_TOKEN=your-token
+# For Git server on Windows (required - adds Git to PATH)
+PATH=C:\Program Files\Git\cmd;C:\Program Files\Git\bin;%PATH%
 ```
 
 ## Adding More MCP Servers
 
-You can add custom MCP servers to your local `.mcp.json`:
+You can add custom MCP servers to your local `.mcp.json`.
 
+**Command-based (npx):**
 ```json
 {
   "mcpServers": {
@@ -97,6 +99,21 @@ You can add custom MCP servers to your local `.mcp.json`:
       "args": ["-y", "package-name"],
       "env": {
         "API_KEY": "your-key"
+      }
+    }
+  }
+}
+```
+
+**HTTP-based (hosted endpoint):**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "type": "http",
+      "url": "https://example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer your-token"
       }
     }
   }

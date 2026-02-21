@@ -146,7 +146,7 @@
     },
     "git": {
       "command": "npx",
-      "args": ["@cyanheads/git-mcp-server@latest"],
+      "args": ["-y", "@cyanheads/git-mcp-server@latest"],
       "description": "Git operations and repository management"
     },
     "supabase": {

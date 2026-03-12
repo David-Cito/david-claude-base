@@ -150,7 +150,26 @@ Verify documentation is current:
 
 ---
 
-## Step 5: Gate Decision
+## Step 5: Completeness Check
+
+Verify all phase requirements were implemented:
+
+- [ ] Cross-reference phase tasks against spec requirements
+- [ ] All tasks in the phase file are marked complete
+- [ ] No spec requirements for this phase were skipped
+- [ ] Existing files were updated (not duplicated)
+
+```
+Completeness Results:
+├── Spec Coverage:    X/Y requirements implemented
+├── Task Completion:  X/X tasks done
+├── Skipped Items:    None | [List any skipped]
+└── Status:           ✅ PASS | ❌ FAIL
+```
+
+---
+
+## Step 6: Gate Decision
 
 ### Compile Results
 
@@ -163,6 +182,7 @@ Verify documentation is current:
 ║  Security:        ✅ PASS | ❌ FAIL                       ║
 ║  Code Quality:    ✅ PASS | ❌ FAIL                       ║
 ║  Documentation:   ✅ PASS | ❌ FAIL                       ║
+║  Completeness:    ✅ PASS | ❌ FAIL                       ║
 ║                                                          ║
 ╠══════════════════════════════════════════════════════════╣
 ║  GATE RESULT:     ✅ PASSED | ❌ FAILED                   ║

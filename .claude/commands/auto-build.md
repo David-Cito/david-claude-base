@@ -1,10 +1,10 @@
 ---
-description: Automated sequential build - runs tasks one by one with phase gates
+description: Automated build - runs tasks with parallel execution and phase gates
 ---
 
 # Auto-Build
 
-Run the entire build automatically, task by task.
+Run the entire build automatically with maximum parallelization.
 
 ## Arguments
 
@@ -12,7 +12,8 @@ $ARGUMENTS
 
 Options:
 - `--dry-run` - Show next 5 tasks without executing
-- (no args) - Start or resume automated build
+- `--sequential` - Force one-by-one execution (default is parallel)
+- (no args) - Start or resume automated build with parallel execution
 
 ---
 
@@ -22,16 +23,51 @@ Options:
 ┌─────────────────────────────────────────────────────────┐
 │                    AUTO-BUILD LOOP                      │
 ├─────────────────────────────────────────────────────────┤
+│  0. CLEANUP   → Delete spec-expand tracking file        │
 │  1. READ      → Parse PROGRESS.md for current state     │
-│  2. FIND      → Get next uncompleted task               │
-│  3. EXECUTE   → Run task with specified agent           │
-│  4. UPDATE    → Mark task complete in files             │
-│  5. CHECK     → If phase complete, run /phase-gate      │
-│  6. CONTINUE  → If gate passes, next task               │
-│  7. STOP      → If gate fails, report issues            │
-│  8. LOOP      → Repeat until done or failure            │
+│  2. FIND      → Get ALL uncompleted tasks               │
+│  3. ANALYZE   → Identify tasks that can run in parallel │
+│  4. EXECUTE   → Run parallel tasks simultaneously       │
+│                 (single message, multiple Task calls)   │
+│  5. UPDATE    → Mark tasks complete in files            │
+│  6. CHECK     → If phase complete, run /phase-gate      │
+│  7. CONTINUE  → If gate passes, next batch              │
+│  8. STOP      → If gate fails, report issues            │
+│  9. LOOP      → Repeat until done or failure            │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## Parallel Execution (Default Mode)
+
+**CRITICAL**: When tasks have no dependencies between them, launch multiple agents simultaneously.
+
+To run tasks in parallel:
+1. Identify tasks with no blocking dependencies
+2. Check for same "Parallel Group" letter or independent tasks
+3. Use a **single message with multiple Task tool calls**
+4. Wait for all parallel tasks to complete
+5. Then proceed to dependent tasks
+
+Example parallel execution:
+```
+Task A1 (no deps) ──┐
+Task A2 (no deps) ──┼── Run simultaneously in ONE message
+Task A3 (no deps) ──┘
+                    ↓
+Task A4 (depends on A1, A2, A3) ── Run after all above complete
+```
+
+---
+
+## Step 0: Cleanup Spec-Expand Tracking
+
+**FIRST**, delete the spec-expand self-tracking file if it exists:
+
+```bash
+rm -f .claude/spec-expand-progress.md
+```
+
+This cleans up the tracking file from the `/spec-expand` command since we're now moving to build phase.
 
 ---
 
@@ -89,44 +125,82 @@ If `$ARGUMENTS` contains `--dry-run`:
 
 ---
 
-## Step 3: Find Next Task
+## Step 3: Find Executable Tasks
 
-If NOT dry-run, find the next task to execute:
+If NOT dry-run, find ALL tasks that can execute now:
 
-1. Parse PROGRESS.md for first uncompleted task (`- [ ]`)
-2. Identify which phase it belongs to
-3. Read the corresponding phase file: `docs/tasks/phase-N-[name].md`
-4. Extract task details:
-   - Task description
-   - Acceptance criteria
-   - Specified agent (look for `Agent:` or infer from task type)
-   - Any dependencies or prerequisites
+1. Parse PROGRESS.md for all uncompleted tasks (`- [ ]`)
+2. For each task, check its dependencies (Depends On / Blocked By)
+3. Build a list of tasks with NO unmet dependencies
+4. Group tasks by "Parallel Group" letter if specified
+5. Read corresponding phase files for task details
 
-**Agent Selection Rules:**
-- UI/component/page tasks → `frontend-architect`
-- API/database/backend tasks → `backend-architect`
-- If task specifies an agent, use that agent
-- If unclear, default to `frontend-architect` for most web projects
+For each executable task, extract:
+- Task description
+- Acceptance criteria
+- **Agent** (REQUIRED - must be specified in task)
+- Dependencies and blockers
+
+**Agent Selection Rules (MANDATORY):**
+
+Every task MUST have an agent. If missing from task file, assign based on:
+
+| Task Type | Agent |
+|-----------|-------|
+| UI, components, pages, styling | `frontend-architect` |
+| API, database, server logic | `backend-architect` |
+| Writing/running tests | `test-engineer` |
+| Security review, auth, audits | `security-auditor` |
+| System design, architecture | `system-architect` |
+| Documentation | `technical-writer` |
+
+**NEVER skip agent assignment. ALWAYS use the correct agent for the task type.**
 
 ---
 
-## Step 4: Execute Task
+## Step 4: Execute Tasks (Parallel When Possible)
 
-Use the Task tool to run the appropriate agent:
+### Parallel Execution (Default)
+
+When multiple tasks have no dependencies, execute them simultaneously:
 
 ```
-Task tool parameters:
-- subagent_type: [selected agent]
-- prompt: [Full task context including:
-    - Task name and description from phase file
-    - Acceptance criteria
-    - Reference to relevant spec files in docs/specs/
-    - Instruction to follow project standards in CLAUDE.md
-  ]
-- description: "[Task name] - [phase]"
+Send a SINGLE message with MULTIPLE Task tool calls:
+
+<Task 1>
+- subagent_type: frontend-architect
+- prompt: [Task A1 details...]
+- description: "Task A1 - Phase 1"
+
+<Task 2>
+- subagent_type: backend-architect
+- prompt: [Task A2 details...]
+- description: "Task A2 - Phase 1"
+
+<Task 3>
+- subagent_type: frontend-architect
+- prompt: [Task A3 details...]
+- description: "Task A3 - Phase 1"
 ```
 
-Wait for agent completion.
+All three tasks run simultaneously. Wait for ALL to complete before proceeding.
+
+### Sequential Execution (When Dependent)
+
+When tasks have dependencies, execute in order:
+
+```
+Execute Task A1 → Wait → Execute Task A2 (depends on A1) → Wait → ...
+```
+
+### Task Prompt Template
+
+Each Task tool call should include:
+- Task name and description from phase file
+- Acceptance criteria
+- Reference to relevant spec files in docs/specs/
+- Reference to existing files to modify (not create new)
+- Instruction to follow project standards in CLAUDE.md
 
 **On Success:** Proceed to Step 5
 **On Failure:** Report error and STOP
@@ -312,25 +386,27 @@ ACTION: Fix issues, then re-run /auto-build
 
 [AUTO-BUILD] Reading PROGRESS.md...
 [AUTO-BUILD] Current: Phase 1 - Foundation (2/5 tasks complete)
-[AUTO-BUILD] Next task: Set up routing structure
+[AUTO-BUILD] Analyzing dependencies...
+[AUTO-BUILD] Found 2 tasks with no blockers - running in PARALLEL
 
+[AUTO-BUILD] Executing simultaneously:
+  ├── Task F3: Set up routing (frontend-architect)
+  └── Task F4: Create base layout (frontend-architect)
+
+... (both agents run in parallel) ...
+
+[AUTO-BUILD] ✅ Parallel batch complete:
+  ├── F3: Set up routing - DONE
+  └── F4: Create base layout - DONE
+[AUTO-BUILD] Phase 1 - Tasks 4/5 complete
+[AUTO-BUILD] Overall: 4/15 tasks (27%)
+
+[AUTO-BUILD] Next task: F5 (depends on F3, F4)
 [AUTO-BUILD] Executing with frontend-architect...
+
 ... (agent runs) ...
 
-[AUTO-BUILD] ✅ Task complete: Set up routing structure
-[AUTO-BUILD] Phase 1 - Task 3/5 complete
-[AUTO-BUILD] Overall: 3/15 tasks (20%)
-
-[AUTO-BUILD] Next task: Create base layout component
-
-[AUTO-BUILD] Executing with frontend-architect...
-... (agent runs) ...
-
-[AUTO-BUILD] ✅ Task complete: Create base layout component
-[AUTO-BUILD] Phase 1 - Task 4/5 complete
-
-... (continues) ...
-
+[AUTO-BUILD] ✅ Task complete: F5
 [AUTO-BUILD] ✅ Phase 1 complete - Running gate check...
 [AUTO-BUILD] /phase-gate phase-1-foundation
 
@@ -338,5 +414,16 @@ ACTION: Fix issues, then re-run /auto-build
 
 [AUTO-BUILD] ✅ Gate PASSED - Proceeding to Phase 2
 
+[AUTO-BUILD] Phase 2 has parallel tracks: 2A and 2B
+[AUTO-BUILD] Executing Phase 2A and 2B simultaneously...
+
+  ├── Task 2A.1 (frontend-architect)
+  ├── Task 2A.2 (frontend-architect)
+  ├── Task 2B.1 (backend-architect)
+  └── Task 2B.2 (backend-architect)
+
+... (4 agents run in parallel) ...
+
+[AUTO-BUILD] ✅ Parallel batch complete
 ... (continues until done or failure) ...
 ```

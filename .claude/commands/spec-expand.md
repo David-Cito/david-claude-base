@@ -1,8 +1,8 @@
 ---
-description: Expand analyzed spec into 3-document structure (specs, tasks, progress)
+description: Analyze spec, ask clarifying questions, then expand into docs/tasks/progress structure
 ---
 
-Expand the analyzed specification into a complete documentation structure for implementation.
+Analyze the specification, ask clarifying questions until all gaps are resolved, then expand into a complete documentation structure for implementation.
 
 ## Input
 
@@ -10,9 +10,189 @@ $ARGUMENTS
 
 If no arguments provided, read `PROJECT-SPEC.md` or `stretchflow-spec.md` from the project root.
 
-**Prerequisites:**
-- Run `/spec-analyze` first to ensure no gaps remain
-- Spec should have DO/DO NOT sections for each feature
+---
+
+# STEP 0: CREATE SELF-TRACKING PROGRESS FILE
+
+**FIRST**, create `.claude/spec-expand-progress.md` to track your own progress through this command:
+
+```markdown
+# Spec Expand Progress
+
+> This file tracks the spec-expand command execution.
+> Check off items as you complete them. Delete nothing until all items are checked.
+> This file will be automatically deleted when /auto-build starts.
+
+## Phase 1: Clarification
+- [ ] Read spec file
+- [ ] Read CLAUDE.md for project context
+- [ ] Scan for existing implementations
+- [ ] Identify all gaps (list categories found)
+- [ ] Ask clarifying questions - Batch 1 (minimum 5 total)
+- [ ] Receive answers, evaluate for more gaps
+- [ ] Ask follow-up questions (if needed)
+- [ ] Continue loop until confident
+- [ ] Announce "Clarification Complete" with question count
+
+## Phase 2: Document Generation
+- [ ] Generate docs/specs/00-diagrams.md (use system-architect)
+- [ ] Generate docs/specs/01-overview.md
+- [ ] Generate docs/specs/02-tech-stack.md
+- [ ] Generate docs/specs/03-data-model.md
+- [ ] Generate docs/specs/04+ feature spec files
+- [ ] Generate docs/tasks/phase-1-foundation.md
+- [ ] Generate docs/tasks/phase-2+ files
+- [ ] Generate docs/tasks/PROGRESS.md with build path diagram
+- [ ] Generate docs/future/POST-MVP.md
+- [ ] Run completeness verification
+- [ ] Display coverage report
+
+## Metadata
+- Started: [timestamp]
+- Spec file: [filename]
+- Questions asked: [count]
+- Status: 🟡 IN PROGRESS
+```
+
+**Update this file as you complete each step.** Mark items with `[x]` when done.
+
+---
+
+# PHASE 1: ANALYSIS & CLARIFICATION (REQUIRED)
+
+**DO NOT generate any documentation until this phase is complete.**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  CLARIFICATION LOOP                             │
+├─────────────────────────────────────────────────────────────────┤
+│  1. Read spec + existing files                                  │
+│  2. Identify ALL gaps, ambiguities, undefined behaviors         │
+│  3. Ask user 3-5 clarifying questions                           │
+│  4. User answers                                                │
+│  5. AI evaluates: "Are there still gaps that could cause        │
+│     me to hallucinate or build unwanted features?"              │
+│     ├── YES → Ask more questions (loop back to step 3)          │
+│     └── NO  → Announce ready, proceed to Phase 2                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Minimum Questions: 5
+
+You MUST ask at least 5 clarifying questions before proceeding. Ask about:
+
+- **Unclear requirements** - Features mentioned but not fully specified
+- **Missing edge cases** - What happens when things fail? Empty states?
+- **Ambiguous terminology** - Terms that could be interpreted multiple ways
+- **Undefined error handling** - How should errors be displayed/handled?
+- **Scope boundaries** - What's explicitly IN vs OUT of scope?
+- **Data validation** - Required fields, max lengths, formats?
+- **User flows** - Complete steps from start to finish?
+- **Success criteria** - How do we know when it's "done"?
+
+## Gap Analysis Framework
+
+Systematically identify:
+
+### Missing Requirements
+- Features mentioned but not fully specified
+- User flows without complete steps
+- Data models with undefined fields
+- Edge cases not addressed
+
+### Undefined Behaviors
+- What happens when things fail?
+- Empty states and zero-data scenarios
+- Maximum limits not specified
+- Error handling not defined
+
+### Unclear Acceptance Criteria
+- How do we know when it's "done"?
+- What does success look like?
+- How do we test this works?
+
+### Ambiguous Terminology
+- Terms used inconsistently
+- Technical jargon without definitions
+- Concepts that could be interpreted multiple ways
+
+## Question Format
+
+Ask questions in batches of 3-5. Be specific:
+
+**Good Questions:**
+- "What should happen when a user uploads an image larger than 10MB?"
+- "Should the timer continue running when the app is backgrounded?"
+- "Is there a maximum number of items allowed per user?"
+- "When login fails, should the error say 'invalid credentials' or specify which field is wrong?"
+
+**Bad Questions (too vague):**
+- "Can you tell me more about the feature?"
+- "What are the requirements?"
+
+## Continuous Loop
+
+After each batch of answers, evaluate:
+
+1. Did the answers reveal new gaps or ambiguities?
+2. Are there still areas where I might hallucinate or add unwanted features?
+3. Is every feature clear enough that I could implement it without guessing?
+
+If ANY uncertainty remains → Ask more questions.
+
+## Anti-Drift Detailing
+
+For each feature, ensure the spec includes (or you've clarified):
+
+**Explicit "DO" List**
+- Specific behaviors to implement
+- Exact data to capture/display
+- Precise user interactions
+
+**Explicit "DO NOT" List**
+- Features explicitly out of scope
+- Over-engineering to avoid
+- Future enhancements to defer
+
+**Exact Behavior Descriptions**
+- "When X happens, Y should occur"
+- Specific UI states and transitions
+- Error messages and handling
+
+**Boundary Conditions**
+- Minimum/maximum values
+- Required vs. optional fields
+- Supported formats and types
+
+## Ready to Proceed
+
+Only when you are confident there are NO remaining gaps, announce:
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  ✅ CLARIFICATION COMPLETE                                       ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Questions asked: [X]                                            ║
+║  Gaps resolved: [list key clarifications]                        ║
+║                                                                  ║
+║  I am confident there are no remaining areas where I could       ║
+║  hallucinate or build unwanted features.                         ║
+║                                                                  ║
+║  Proceeding to document generation...                            ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+# PHASE 2: DOCUMENT GENERATION
+
+## Working with Existing Files
+
+Before generating new documentation:
+1. **Scan for existing implementations** - Check for setup files, partial implementations, or config files related to the spec
+2. **Inventory what exists** - List files that are already created or partially complete
+3. **Build on top, don't duplicate** - Mark existing work as complete in generated tasks
+4. **Reference existing code** - Link tasks to files that need modification vs. creation
 
 ## Output Structure
 
@@ -21,14 +201,15 @@ Generate three categories of documentation:
 ```
 docs/
 ├── specs/                    # Feature specifications
-│   ├── 00-overview.md        # Project overview and scope
-│   ├── 01-tech-stack.md      # Technology decisions
-│   ├── 02-data-model.md      # Data structures and storage
-│   ├── 03-feature-name.md    # Per-feature detailed spec
+│   ├── 00-diagrams.md        # ASCII architecture/flow diagrams
+│   ├── 01-overview.md        # Project overview and scope
+│   ├── 02-tech-stack.md      # Technology decisions
+│   ├── 03-data-model.md      # Data structures and storage
+│   ├── 04-feature-name.md    # Per-feature detailed spec
 │   └── ...
 │
 ├── tasks/                    # Implementation task lists
-│   ├── PROGRESS.md           # Central tracking + parallel order
+│   ├── PROGRESS.md           # Central tracking + build path diagram
 │   ├── phase-1-foundation.md # Phase task files
 │   ├── phase-2-feature.md
 │   └── ...
@@ -41,7 +222,151 @@ docs/
 
 ## Document 1: Feature Specs (docs/specs/)
 
-### 00-overview.md
+### 00-diagrams.md
+
+**Agent**: system-architect (REQUIRED to create these diagrams)
+
+Create ASCII diagrams for quick visual understanding of the system. Use these as reference examples:
+
+#### System Architecture Diagram Example
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         SYSTEM OVERVIEW                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────┐      ┌──────────────┐      ┌──────────────────┐   │
+│  │  Client  │      │   Next.js    │      │    Supabase      │   │
+│  │ (React)  │─────▶│   API Routes │─────▶│   PostgreSQL     │   │
+│  │          │◀─────│              │◀─────│                  │   │
+│  └──────────┘      └──────────────┘      └──────────────────┘   │
+│       │                   │                       │              │
+│       │                   │                       │              │
+│       ▼                   ▼                       ▼              │
+│  ┌──────────┐      ┌──────────────┐      ┌──────────────────┐   │
+│  │   Auth   │      │   External   │      │     Storage      │   │
+│  │  (MSAL)  │      │    APIs      │      │    (Buckets)     │   │
+│  └──────────┘      └──────────────┘      └──────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Feature Flow Diagram Example
+
+```
+USER LOGIN FLOW
+═══════════════
+
+┌────────┐    ┌────────────┐    ┌────────────┐    ┌───────────┐
+│  Form  │───▶│  Validate  │───▶│  Auth API  │───▶│  Session  │
+│ Input  │    │   Client   │    │   Call     │    │  Created  │
+└────────┘    └────────────┘    └────────────┘    └───────────┘
+                   │                  │                  │
+                   ▼                  ▼                  ▼
+              ┌────────┐        ┌──────────┐      ┌───────────┐
+              │ Show   │        │  401/403 │      │ Redirect  │
+              │ Errors │        │  Handle  │      │ Dashboard │
+              └────────┘        └──────────┘      └───────────┘
+```
+
+#### Data Flow Diagram Example
+
+```
+DATA FLOW: CREATE ITEM
+══════════════════════
+
+     User Input          Validation           API              Database
+         │                   │                 │                   │
+         ▼                   │                 │                   │
+    ┌─────────┐              │                 │                   │
+    │  Form   │──────────────┼────────────────▶│                   │
+    │  Data   │              │                 │                   │
+    └─────────┘              │                 │                   │
+         │                   ▼                 │                   │
+         │              ┌─────────┐            │                   │
+         │              │ Zod     │            │                   │
+         │              │ Schema  │────────────┼──────────────────▶│
+         │              └─────────┘            │                   │
+         │                   │                 ▼                   ▼
+         │                   │            ┌─────────┐        ┌─────────┐
+         │                   │            │ INSERT  │───────▶│  Row    │
+         │                   │            │ Query   │        │ Created │
+         │                   │            └─────────┘        └─────────┘
+         │                   │                 │                   │
+         ◀───────────────────┴─────────────────┴───────────────────┘
+                              Response / Error
+```
+
+#### State Machine Diagram Example
+
+```
+ITEM STATUS STATE MACHINE
+═════════════════════════
+
+                    ┌─────────────────────────────────┐
+                    │                                 │
+                    ▼                                 │
+    ┌─────────┐   create   ┌─────────┐   submit   ┌─────────┐
+    │  DRAFT  │───────────▶│ PENDING │───────────▶│ ACTIVE  │
+    └─────────┘            └─────────┘            └─────────┘
+         │                      │                      │
+         │ delete               │ reject               │ complete
+         ▼                      ▼                      ▼
+    ┌─────────┐            ┌─────────┐            ┌─────────┐
+    │ DELETED │            │REJECTED │───────────▶│COMPLETED│
+    └─────────┘            └─────────┘   retry    └─────────┘
+```
+
+#### Component Hierarchy Example
+
+```
+COMPONENT TREE
+══════════════
+
+App
+ ├── Layout
+ │    ├── Header
+ │    │    ├── Logo
+ │    │    ├── Navigation
+ │    │    └── UserMenu
+ │    ├── Sidebar
+ │    │    ├── NavLinks
+ │    │    └── QuickActions
+ │    └── Main (content area)
+ │
+ ├── Pages
+ │    ├── Dashboard
+ │    │    ├── StatsCards
+ │    │    └── RecentActivity
+ │    ├── Items
+ │    │    ├── ItemList
+ │    │    ├── ItemCard
+ │    │    └── ItemForm
+ │    └── Settings
+ │
+ └── Shared
+      ├── Button
+      ├── Modal
+      ├── Toast
+      └── LoadingSpinner
+```
+
+#### Guidelines for Diagrams
+
+- **One diagram per major feature** OR one combined system diagram
+- **Keep diagrams scannable** - fit within ~80 characters width
+- **Use consistent symbols**:
+  - `───▶` for data/control flow
+  - `│` and `├──` for hierarchy/trees
+  - `┌─┐ └─┘` for boxes/containers
+  - `═══` for section headers
+- **Label everything clearly**
+- **Include error/alternate paths** when relevant
+- **Show direction** - arrows indicate flow
+
+---
+
+### 01-overview.md
 
 Include:
 - **Project Summary**: One paragraph description
@@ -98,13 +423,23 @@ Brief description of what this phase accomplishes.
 ## Prerequisites
 - [ ] What must be complete before starting this phase
 
+## Phase Gate
+- [ ] Run `/phase-gate phase-X-name` after all tasks complete
+
 ---
 
 ## Task X.1: Task Name
 
-**Agent**: frontend-architect | backend-architect
+**Agent**: frontend-architect | backend-architect | test-engineer | security-auditor
+**REQUIRED** - Every task MUST specify an agent. Choose based on:
+- `frontend-architect`: UI, components, pages, client-side logic
+- `backend-architect`: API, database, server-side logic, integrations
+- `test-engineer`: Writing and running tests
+- `security-auditor`: Security reviews and audits
+
 **Depends On**: Task IDs that must complete first
 **Blocks**: Task IDs that wait on this
+**Parallel Group**: Tasks with same group letter can run simultaneously (e.g., "A", "B")
 
 ### Objective
 One sentence describing the goal.
@@ -173,19 +508,95 @@ Use format: `[Phase Letter][Task Number]`
 
 ## Parallel Execution
 
+**IMPORTANT**: When tasks have no dependencies between them, launch multiple agents simultaneously using parallel Task tool calls in a single message.
+
 Phases that can run simultaneously:
 - Phase 2A and 2B (both depend only on Phase 1)
+
+Tasks within a phase that can run in parallel:
+- Tasks with same "Parallel Group" letter
+- Tasks with no shared dependencies
 
 Phases that must be sequential:
 - Phase 3 requires all Phase 2 tracks complete
 
-## Dependency Graph
+## Build Path Diagram
+
+**REQUIRED**: Visual representation of the entire build showing parallel vs sequential execution.
 
 ```
-Phase 1 ──┬── Phase 2A ──┐
-          │              ├── Phase 3 ── Phase 4 ── Phase 5
-          └── Phase 2B ──┘
+PHASE 1: FOUNDATION
+┌─────────────────────────────────────────────────────────────────┐
+│  ┌─────┐    ┌─────┐    ┌─────┐    ┌─────┐    ┌─────┐           │
+│  │ F1  │───▶│ F2  │───▶│ F3  │───▶│ F4  │───▶│ F5  │           │
+│  │Setup│    │Config│   │Core │    │Layout│   │Route│           │
+│  └─────┘    └─────┘    └─────┘    └─────┘    └─────┘           │
+└─────────────────────────────────────────────────────────────────┘
+                                   │
+                    ┌──────────────┴──────────────┐
+                    ▼                             ▼
+PHASE 2A: AUTH                    PHASE 2B: API (PARALLEL TRACK)
+┌───────────────────────────┐     ┌───────────────────────────┐
+│  ┌─────┐ ┌─────┐ ┌─────┐  │     │  ┌─────┐ ┌─────┐ ┌─────┐  │
+│  │ A1  │▶│ A2  │▶│ A3  │  │     │  │ B1  │▶│ B2  │▶│ B3  │  │
+│  │Login│ │Token│ │Guard│  │     │  │Endpt│ │Valid│ │Error│  │
+│  └─────┘ └─────┘ └─────┘  │     │  └─────┘ └─────┘ └─────┘  │
+└───────────────────────────┘     └───────────────────────────┘
+            │                                 │
+            └─────────────┬───────────────────┘
+                          ▼
+PHASE 3: INTEGRATION
+┌─────────────────────────────────────────────────────────────────┐
+│  ┌─────┐         ┌─────┐         ┌─────┐                       │
+│  │ I1  │────────▶│ I2  │────────▶│ I3  │                       │
+│  │Wire │         │Test │         │Verify│                      │
+│  └─────┘         └─────┘         └─────┘                       │
+└─────────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+PHASE 4: POLISH ────▶ PHASE 5: RELEASE ────▶ 🚀 SHIP
 ```
+
+### Reading the Build Path Diagram
+
+| Symbol | Meaning |
+|--------|---------|
+| `───▶` or `▶` | Sequential: must complete before next |
+| Side-by-side boxes | Parallel: run simultaneously |
+| `│` with `▼` | Phase dependency: wait for above |
+| `┌─────┐` boxed groups | Tasks within same execution context |
+
+### Parallel Execution Visual
+
+Tasks that can run in parallel are shown **side-by-side at the same level**:
+
+```
+PARALLEL TASKS (run in ONE message with multiple Task calls):
+┌─────────────────────────────────────────────────────────────┐
+│  ┌─────┐    ┌─────┐    ┌─────┐    ┌─────┐                  │
+│  │ T1  │    │ T2  │    │ T3  │    │ T4  │  ◀── ALL AT ONCE │
+│  └─────┘    └─────┘    └─────┘    └─────┘                  │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+SEQUENTIAL TASK (runs after all above complete):
+┌─────────────────────────────────────────────────────────────┐
+│                       ┌─────┐                               │
+│                       │ T5  │  ◀── WAITS FOR T1-T4          │
+│                       └─────┘                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Phase Gates (DO NOT SKIP)
+
+After completing all tasks in a phase, run the gate before proceeding:
+
+- [ ] `/phase-gate phase-1-foundation` - Run after Phase 1 complete
+- [ ] `/phase-gate phase-2a-feature-a` - Run after Phase 2A complete
+- [ ] `/phase-gate phase-2b-feature-b` - Run after Phase 2B complete
+- [ ] `/phase-gate phase-3-integration` - Run after Phase 3 complete
+- [ ] `/phase-gate phase-4-polish` - Run after Phase 4 complete
+- [ ] `/phase-gate phase-5-release` - FINAL gate before ship
 
 ## Current Focus
 Next task to work on: [Task ID] - [Task Name]
@@ -228,28 +639,96 @@ Long-term features to keep in mind for architecture decisions.
 
 ---
 
-## Generation Process
+## Full Process (Both Phases)
 
-1. **Read the analyzed spec** with DO/DO NOT sections
-2. **Identify features** and their dependencies
-3. **Group into phases** based on dependencies
-4. **Generate spec files** with detailed requirements
-5. **Generate task files** with actionable checklists
-6. **Generate progress tracker** with parallel execution diagram
-7. **Generate POST-MVP** with explicitly deferred features
+### Phase 1: Analysis & Clarification
+1. **Read spec and CLAUDE.md** - Understand project context and constraints
+2. **Scan for existing files** - Check what's already implemented
+3. **Identify all gaps** - Missing requirements, undefined behaviors, ambiguities
+4. **Ask clarifying questions** - Minimum 5, in batches of 3-5
+5. **Loop until confident** - Keep asking until no areas remain where AI could drift
+6. **Announce ready** - Display completion message, proceed to Phase 2
+
+### Phase 2: Document Generation
+7. **Identify features** and their dependencies
+8. **Group into phases** based on dependencies
+9. **Assign agents to every task** - No task without an agent
+10. **Identify parallel groups** - Mark tasks that can run simultaneously
+11. **Generate 00-diagrams.md** - Use system-architect to create ASCII diagrams:
+    - System architecture overview
+    - Feature flow diagrams for each major feature
+    - Data flow or state machine diagrams as needed
+12. **Generate spec files** with detailed requirements
+13. **Generate task files** with actionable checklists
+14. **Generate progress tracker** with:
+    - Build path diagram showing parallel vs sequential
+    - Embedded phase gates
+    - Parallel execution notes
+15. **Generate POST-MVP** with explicitly deferred features
+16. **Run completeness verification** (see below)
+
+## Completeness Verification
+
+After generating all documentation, verify nothing was missed:
+
+```markdown
+## Coverage Report
+
+### Spec Items → Task Mapping
+| Spec Requirement | Task ID | Status |
+|-----------------|---------|--------|
+| User authentication | F2, F3 | ✅ Covered |
+| API integration | A1, A2 | ✅ Covered |
+| Error handling | B3 | ✅ Covered |
+| [Requirement] | [Task] | ✅ Covered / ❌ Missing |
+
+### Verification Checklist
+- [ ] Every spec requirement has at least one task
+- [ ] Every task has an assigned agent
+- [ ] Every phase has a gate checkpoint in PROGRESS.md
+- [ ] Parallel groups are identified for independent tasks
+- [ ] Existing files are referenced (not recreated)
+```
+
+If any items show ❌ Missing, add tasks before proceeding.
 
 ## Key Principles
 
+- **Clarify before building**: Ask questions until no ambiguity remains
+- **AI decides readiness**: The AI determines when clarification is complete, not the user
+- **Minimum 5 questions**: Never skip the clarification phase
 - **Tasks are atomic**: Each can be completed in one session
 - **Dependencies are explicit**: No hidden prerequisites
 - **DO NOT sections prevent scope creep**: What NOT to build
 - **Quality gates are built-in**: code-reviewer + test-engineer after each task
-- **Parallel work is identified**: What can run simultaneously
+- **Parallel work is maximized**: Run independent tasks simultaneously
+- **Agents are mandatory**: Every task specifies which agent executes it
+- **Completeness is verified**: Cross-reference spec → tasks before starting
+
+## Final Step: Mark Self-Tracking Complete
+
+After all documents are generated, update `.claude/spec-expand-progress.md`:
+
+```markdown
+## Metadata
+- Started: [timestamp]
+- Completed: [timestamp]
+- Spec file: [filename]
+- Questions asked: [count]
+- Documents generated: [count]
+- Status: ✅ COMPLETE
+```
+
+This file will be automatically deleted when `/auto-build` starts.
+
+---
 
 ## After Running This Command
 
-1. Review generated documentation for accuracy
-2. Adjust phase organization if needed
-3. Begin implementation with Phase 1
-4. Run `/phase-gate` between phases
-5. Update PROGRESS.md as tasks complete
+1. Answer all clarifying questions from Phase 1
+2. Wait for AI to announce "Clarification Complete"
+3. Review generated documentation for accuracy
+4. Adjust phase organization if needed
+5. Begin implementation with `/auto-build` or manually
+6. Run `/phase-gate` between phases
+7. Update PROGRESS.md as tasks complete

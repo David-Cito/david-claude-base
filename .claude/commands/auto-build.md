@@ -61,10 +61,12 @@ Task A4 (depends on A1, A2, A3) ── Run after all above complete
 
 ## Step 0: Cleanup Spec-Expand Tracking
 
-**FIRST**, delete the spec-expand self-tracking file if it exists:
+**FIRST**, delete the spec-expand self-tracking file if it exists.
+
+The file `spec-expand-progress.md` will be in the same folder as `PROGRESS.md`. Delete it:
 
 ```bash
-rm -f docs/tasks/spec-expand-progress.md
+rm -f [same-folder-as-PROGRESS.md]/spec-expand-progress.md
 ```
 
 This cleans up the tracking file from the `/spec-expand` command since we're now moving to build phase.

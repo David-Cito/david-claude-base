@@ -14,7 +14,13 @@ If no arguments provided, read `PROJECT-SPEC.md` or `stretchflow-spec.md` from t
 
 # STEP 0: CREATE SELF-TRACKING PROGRESS FILE
 
-**FIRST**, create `docs/tasks/spec-expand-progress.md` to track your own progress through this command:
+**FIRST**, create `spec-expand-progress.md` in the **same folder as the spec file** to track your progress.
+
+Example:
+- Spec at `docs/plans/my-feature/spec.md` → Create `docs/plans/my-feature/spec-expand-progress.md`
+- Spec at `PROJECT-SPEC.md` (root) → Create `spec-expand-progress.md` (root)
+
+All generated docs (specs/, tasks/, future/) will also be created relative to this same folder.
 
 ```markdown
 # Spec Expand Progress
@@ -22,6 +28,10 @@ If no arguments provided, read `PROJECT-SPEC.md` or `stretchflow-spec.md` from t
 > This file tracks the spec-expand command execution.
 > Check off items as you complete them. Delete nothing until all items are checked.
 > This file will be automatically deleted when /auto-build starts.
+
+## Spec Location
+- Spec file: [full path to spec file]
+- Output folder: [folder where spec file lives]
 
 ## Phase 1: Clarification
 - [ ] Read spec file
@@ -35,21 +45,20 @@ If no arguments provided, read `PROJECT-SPEC.md` or `stretchflow-spec.md` from t
 - [ ] Announce "Clarification Complete" with question count
 
 ## Phase 2: Document Generation
-- [ ] Generate docs/specs/00-diagrams.md (use system-architect)
-- [ ] Generate docs/specs/01-overview.md
-- [ ] Generate docs/specs/02-tech-stack.md
-- [ ] Generate docs/specs/03-data-model.md
-- [ ] Generate docs/specs/04+ feature spec files
-- [ ] Generate docs/tasks/phase-1-foundation.md
-- [ ] Generate docs/tasks/phase-2+ files
-- [ ] Generate docs/tasks/PROGRESS.md with build path diagram
-- [ ] Generate docs/future/POST-MVP.md
+- [ ] Generate specs/00-diagrams.md (use system-architect)
+- [ ] Generate specs/01-overview.md
+- [ ] Generate specs/02-tech-stack.md
+- [ ] Generate specs/03-data-model.md
+- [ ] Generate specs/04+ feature spec files
+- [ ] Generate tasks/phase-1-foundation.md
+- [ ] Generate tasks/phase-2+ files
+- [ ] Generate tasks/PROGRESS.md with build path diagram
+- [ ] Generate future/POST-MVP.md
 - [ ] Run completeness verification
 - [ ] Display coverage report
 
 ## Metadata
 - Started: [timestamp]
-- Spec file: [filename]
 - Questions asked: [count]
 - Status: 🟡 IN PROGRESS
 ```
@@ -196,10 +205,12 @@ Before generating new documentation:
 
 ## Output Structure
 
-Generate three categories of documentation:
+Generate three categories of documentation **in the same folder as the spec file**:
 
 ```
-docs/
+[spec-file-folder]/
+├── spec-expand-progress.md   # Self-tracking (deleted by /auto-build)
+│
 ├── specs/                    # Feature specifications
 │   ├── 00-diagrams.md        # ASCII architecture/flow diagrams
 │   ├── 01-overview.md        # Project overview and scope
@@ -217,6 +228,11 @@ docs/
 └── future/
     └── POST-MVP.md           # Deferred features (DO NOT BUILD)
 ```
+
+**Example**: If spec is at `docs/plans/sentry-setup/spec.md`, output goes to:
+- `docs/plans/sentry-setup/specs/00-diagrams.md`
+- `docs/plans/sentry-setup/tasks/PROGRESS.md`
+- `docs/plans/sentry-setup/future/POST-MVP.md`
 
 ---
 

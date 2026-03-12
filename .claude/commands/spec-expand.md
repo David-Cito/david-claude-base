@@ -14,7 +14,7 @@ If no arguments provided, read `PROJECT-SPEC.md` or `stretchflow-spec.md` from t
 
 # STEP 0: CREATE SELF-TRACKING PROGRESS FILE
 
-**FIRST**, create `.claude/spec-expand-progress.md` to track your own progress through this command:
+**FIRST**, create `docs/tasks/spec-expand-progress.md` to track your own progress through this command:
 
 ```markdown
 # Spec Expand Progress
@@ -707,7 +707,7 @@ If any items show ❌ Missing, add tasks before proceeding.
 
 ## Final Step: Mark Self-Tracking Complete
 
-After all documents are generated, update `.claude/spec-expand-progress.md`:
+After all documents are generated, update `docs/tasks/spec-expand-progress.md`:
 
 ```markdown
 ## Metadata

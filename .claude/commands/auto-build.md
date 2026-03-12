@@ -64,7 +64,7 @@ Task A4 (depends on A1, A2, A3) ── Run after all above complete
 **FIRST**, delete the spec-expand self-tracking file if it exists:
 
 ```bash
-rm -f .claude/spec-expand-progress.md
+rm -f docs/tasks/spec-expand-progress.md
 ```
 
 This cleans up the tracking file from the `/spec-expand` command since we're now moving to build phase.

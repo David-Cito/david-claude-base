@@ -38,11 +38,13 @@ All generated docs (specs/, tasks/, future/) will also be created relative to th
 - [ ] Read CLAUDE.md for project context
 - [ ] Scan for existing implementations
 - [ ] Identify all gaps (list categories found)
-- [ ] Ask clarifying questions - Batch 1 (minimum 5 total)
-- [ ] Receive answers, evaluate for more gaps
-- [ ] Ask follow-up questions (if needed)
-- [ ] Continue loop until confident
-- [ ] Announce "Clarification Complete" with question count
+- [ ] Ask Question 1 (using AskUserQuestion tool)
+- [ ] Ask Question 2
+- [ ] Ask Question 3
+- [ ] Ask Question 4
+- [ ] Ask Question 5
+- [ ] Ask additional questions until confident (list count)
+- [ ] Announce "Clarification Complete" with total question count
 
 ## Phase 2: Document Generation
 - [ ] Generate specs/00-diagrams.md (use system-architect)
@@ -88,7 +90,11 @@ All generated docs (specs/, tasks/, future/) will also be created relative to th
 
 ## Minimum Questions: 5
 
-You MUST ask at least 5 clarifying questions before proceeding. Ask about:
+You MUST ask at least 5 clarifying questions **one at a time** before proceeding.
+
+Use the **AskUserQuestion tool** for each question with selectable options.
+
+Ask about:
 
 - **Unclear requirements** - Features mentioned but not fully specified
 - **Missing edge cases** - What happens when things fail? Empty states?
@@ -127,27 +133,69 @@ Systematically identify:
 
 ## Question Format
 
-Ask questions in batches of 3-5. Be specific:
+**USE THE AskUserQuestion TOOL** to ask questions one at a time with selectable options.
 
-**Good Questions:**
-- "What should happen when a user uploads an image larger than 10MB?"
-- "Should the timer continue running when the app is backgrounded?"
-- "Is there a maximum number of items allowed per user?"
-- "When login fails, should the error say 'invalid credentials' or specify which field is wrong?"
+### How to Ask Questions
 
-**Bad Questions (too vague):**
-- "Can you tell me more about the feature?"
-- "What are the requirements?"
+Use the AskUserQuestion tool with:
+- **question**: The specific question to ask
+- **options**: 2-4 selectable choices (user can also type custom answer)
+- **header**: Short label (e.g., "Error Handling", "Scope", "Data")
+
+### Ask Questions in Series
+
+Ask ONE question at a time. Wait for the answer before asking the next question.
+
+```
+Question 1 → Wait for answer →
+Question 2 → Wait for answer →
+Question 3 → Wait for answer →
+... continue until confident
+```
+
+### Example Questions with Options
+
+**Question 1:**
+- Header: "File Upload"
+- Question: "What should happen when a user uploads an image larger than 10MB?"
+- Options:
+  - "Show error, reject upload"
+  - "Auto-compress to under 10MB"
+  - "Allow up to 25MB"
+  - "No file uploads needed"
+
+**Question 2:**
+- Header: "Error Display"
+- Question: "When login fails, how should errors be displayed?"
+- Options:
+  - "Generic 'Invalid credentials' message"
+  - "Specific field errors (email/password)"
+  - "Toast notification"
+  - "Inline form errors"
+
+**Question 3:**
+- Header: "Scope"
+- Question: "Should user profiles include avatar uploads?"
+- Options:
+  - "Yes, required feature"
+  - "Yes, but optional for MVP"
+  - "No, out of scope"
+
+### After Each Answer
+
+After receiving each answer:
+1. Update your understanding of the spec
+2. Check if the answer revealed new gaps
+3. Ask the next question OR announce ready if confident
 
 ## Continuous Loop
 
-After each batch of answers, evaluate:
+Keep asking questions ONE AT A TIME until:
+- You've asked at least 5 questions
+- No remaining areas where you might hallucinate
+- Every feature is clear enough to implement without guessing
 
-1. Did the answers reveal new gaps or ambiguities?
-2. Are there still areas where I might hallucinate or add unwanted features?
-3. Is every feature clear enough that I could implement it without guessing?
-
-If ANY uncertainty remains → Ask more questions.
+If ANY uncertainty remains → Ask another question.
 
 ## Anti-Drift Detailing
 
